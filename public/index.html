@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Client IP</title>
+    <script>
+        async function getClientIp() {
+            try {
+                // API endpointine istek gönder
+                const response = await fetch('/api/get-ip');
+                
+                if (!response.ok) {
+                    throw new Error('Ağ yanıtı geçersiz');
+                }
+                
+                const data = await response.json();
+                const ip = data.ip;
+
+                // IP adresini göster
+                document.getElementById('ip').textContent = `IP Adresiniz: ${ip}`;
+                
+                // IP adresini sunucuya gönder
+                const result = await fetch('/api/receive-ip', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ ip: ip })
+                });
+
+                const resultData = await result.json();
+                
+                if (resultData.valid) {
+                    // Geçerli IP için mesajı göster
+                    document.getElementById('message').textContent = resultData.message;
+                } else {
+                    // Geçersiz IP için alert göster
+                    alert(resultData.message);
+                }
+            } catch (error) {
+                console.error('IP adresi alınamadı:', error);
+                document.getElementById('ip').textContent = 'IP adresi alınamadı.';
+            }
+        }
+
+        window.onload = getClientIp;
+    </script>
+</head>
+<body>
+    <h1>İstemci IP Adresi</h1>
+    <p id="ip">IP Adresiniz yükleniyor...</p>
+    <p id="message"></p> <!-- Burada geçerli IP için mesaj gösterilecek -->
+</body>
+</html>
